@@ -1,0 +1,39 @@
+{
+  "name": "othman-boularas-website",
+  "version": "1.0.0",
+  "description": "Othman Boularas athlete website with Payload CMS",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "payload migrate && next build",
+    "build:site-only": "next build",
+    "start": "next start",
+    "payload": "payload",
+    "migrate": "payload migrate",
+    "migrate:create": "payload migrate:create",
+    "generate:importmap": "payload generate:importmap",
+    "generate:types": "payload generate:types"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "3.92.0",
+    "@payloadcms/next": "3.92.0",
+    "@payloadcms/storage-vercel-blob": "3.92.0",
+    "@payloadcms/ui": "3.92.0",
+    "graphql": "16.14.2",
+    "next": "16.4.3",
+    "payload": "3.92.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "sharp": "0.34.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
