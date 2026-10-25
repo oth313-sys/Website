@@ -1,8 +1,9 @@
 import type { GlobalConfig } from 'payload'
-import { checkToken } from '../lib/instagram-api'
+import { checkBeholdFeed, checkToken } from '../lib/instagram-api'
 import { revalidateSite } from '../lib/revalidate'
 
 const loggedIn = ({ req }: { req: { user?: unknown } }) => Boolean(req.user)
+const clean = (v: unknown) => String(v ?? '').trim()
 
 export const InstagramFeed: GlobalConfig = {
   slug: 'instagram',
@@ -19,20 +20,34 @@ export const InstagramFeed: GlobalConfig = {
       async ({ data, originalDoc, context }) => {
         // The weekly renewal job sets these fields itself.
         if (context?.skipCheck) return data
-        const token = String(data.accessToken ?? originalDoc?.accessToken ?? '').trim()
-        if (!token) {
-          data.status = 'Not connected. Paste an access token to show your latest posts.'
+
+        const feedUrl = clean(data.feedUrl ?? originalDoc?.feedUrl)
+        const token = clean(data.accessToken ?? originalDoc?.accessToken)
+        if (data.feedUrl !== undefined) data.feedUrl = feedUrl
+        if (data.accessToken !== undefined) data.accessToken = token
+
+        const changed =
+          feedUrl !== clean(originalDoc?.feedUrl) ||
+          token !== clean(originalDoc?.accessToken) ||
+          !clean(originalDoc?.status).startsWith('Connected')
+        if (!changed) return data
+
+        if (feedUrl) {
+          const check = await checkBeholdFeed(feedUrl)
+          data.status = check.ok
+            ? `Connected through Behold${check.username ? ` to @${check.username}` : ''} (${check.posts} posts in the feed).`
+            : `This Behold link didn't work: ${check.error}.`
           return data
         }
-        const previous = String(originalDoc?.accessToken ?? '').trim()
-        if (token !== previous || !String(originalDoc?.status ?? '').startsWith('Connected')) {
+        if (token) {
           const check = await checkToken(token)
           data.status = check.ok
             ? `Connected to @${check.username}.`
             : `This access token didn't work: ${check.error}`
           if (check.ok) data.tokenRenewedAt = new Date().toISOString()
+          return data
         }
-        if (data.accessToken !== undefined) data.accessToken = token
+        data.status = 'Not connected. Paste a Behold feed link (or an access token) to show your latest posts.'
         return data
       },
     ],
@@ -52,14 +67,37 @@ export const InstagramFeed: GlobalConfig = {
       admin: { readOnly: true },
     },
     {
-      name: 'accessToken',
-      label: 'Instagram access token',
-      type: 'textarea',
+      name: 'feedUrl',
+      label: 'Behold feed link (easiest)',
+      type: 'text',
       admin: {
-        rows: 3,
+        placeholder: 'https://feeds.behold.so/…',
         description:
-          'From your Meta developer app: Instagram → API setup with Instagram business login → Generate token. It renews itself automatically every week.',
+          'On behold.so: connect your Instagram, create a JSON feed, and paste its link here. No developer setup needed.',
       },
+    },
+    {
+      type: 'collapsible',
+      label: 'Advanced: connect with a Meta access token instead',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          name: 'accessToken',
+          label: 'Instagram access token',
+          type: 'textarea',
+          admin: {
+            rows: 3,
+            description:
+              'Only needed if you are not using Behold. From developers.facebook.com: your app → Instagram → API setup with Instagram business login → Generate token. It renews itself every week.',
+          },
+        },
+        {
+          name: 'tokenRenewedAt',
+          label: 'Access token last renewed',
+          type: 'date',
+          admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } },
+        },
+      ],
     },
     {
       name: 'postCount',
@@ -68,13 +106,7 @@ export const InstagramFeed: GlobalConfig = {
       defaultValue: 6,
       min: 3,
       max: 12,
-      admin: { description: 'Shown three per row. 6 matches the original design.' },
-    },
-    {
-      name: 'tokenRenewedAt',
-      label: 'Access token last renewed',
-      type: 'date',
-      admin: { readOnly: true, date: { pickerAppearance: 'dayAndTime' } },
+      admin: { description: 'Shown three per row. 6 matches the original design (and is the most Behold’s free plan provides).' },
     },
   ],
 }

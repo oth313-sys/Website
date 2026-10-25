@@ -34,7 +34,7 @@ export default async function HomePage() {
     ? live.map((post) => ({
         key: post.id,
         href: post.permalink,
-        image: `/ig-image/${post.id}`,
+        image: post.image,
         alt: post.caption ? `Instagram post: ${postTitle(post.caption)}` : 'Othman Boularas Instagram post',
         category: postLabel(post.mediaType),
         title: postTitle(post.caption),
