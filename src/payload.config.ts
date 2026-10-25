@@ -11,6 +11,7 @@ import { HomePage } from './globals/HomePage'
 import { InstagramFeed } from './globals/InstagramFeed'
 import { SiteSettings } from './globals/SiteSettings'
 import { SponsorshipPage } from './globals/SponsorshipPage'
+import { seedIfEmpty } from './lib/seed'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,6 +33,7 @@ export default buildConfig({
     push: false,
   }),
   sharp,
+  onInit: seedIfEmpty,
   plugins: [
     vercelBlobStorage({
       enabled: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
