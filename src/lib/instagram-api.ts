@@ -3,7 +3,7 @@
 const GRAPH = 'https://graph.instagram.com'
 
 /** Checks a token and returns the account's username. */
-export async function checkToken(token: string): Promise<{ ok: true; username: string } | { ok: false; error: string }> {
+export async function checkToken(token: string): Promise<{ ok: boolean; username?: string; error?: string }> {
   try {
     const res = await fetch(`${GRAPH}/me?fields=user_id,username&access_token=${encodeURIComponent(token)}`, {
       cache: 'no-store',
@@ -17,7 +17,7 @@ export async function checkToken(token: string): Promise<{ ok: true; username: s
 }
 
 /** Extends a long-lived token by another 60 days. */
-export async function refreshToken(token: string): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+export async function refreshToken(token: string): Promise<{ ok: boolean; token?: string; error?: string }> {
   try {
     const res = await fetch(
       `${GRAPH}/refresh_access_token?grant_type=ig_refresh_token&access_token=${encodeURIComponent(token)}`,
