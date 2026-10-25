@@ -8,6 +8,7 @@ import sharp from 'sharp'
 import { Media } from './collections/Media'
 import { Users } from './collections/Users'
 import { HomePage } from './globals/HomePage'
+import { InstagramFeed } from './globals/InstagramFeed'
 import { SiteSettings } from './globals/SiteSettings'
 import { SponsorshipPage } from './globals/SponsorshipPage'
 
@@ -22,7 +23,7 @@ export default buildConfig({
     meta: { titleSuffix: ' · Othman Boularas' },
   },
   collections: [Users, Media],
-  globals: [HomePage, SponsorshipPage, SiteSettings],
+  globals: [HomePage, SponsorshipPage, SiteSettings, InstagramFeed],
   db: postgresAdapter({
     pool: { connectionString: process.env.POSTGRES_URL || process.env.DATABASE_URL || '' },
     // Everything lives in its own "cms" schema, separate from anything else in the database.

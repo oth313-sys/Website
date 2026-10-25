@@ -286,6 +286,15 @@ export const HomePage: GlobalConfig = {
               ],
             },
             longText('note', 'Small print'),
+            {
+              type: 'collapsible',
+              label: 'Text shown when your Instagram feed is connected',
+              admin: { initCollapsed: true },
+              fields: [
+                longText('liveIntro', 'Introduction (Instagram feed)'),
+                longText('liveNote', 'Small print (Instagram feed)'),
+              ],
+            },
           ],
         },
         {

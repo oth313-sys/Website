@@ -295,6 +295,9 @@ export const homeDefaults = {
       postUrl: '',
     })),
     note: 'These are original athlete photographs, not verified Instagram post embeds. Cards without their own Instagram post link open the official Instagram profile.',
+    liveIntro:
+      'The latest moments from Othman’s official Instagram: training, competition and life beyond the mat.',
+    liveNote: 'Posts appear here automatically from @othmanboularas on Instagram.',
   },
   contact: {
     eyebrow: '05 / Partnerships · Media · Community',

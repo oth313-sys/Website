@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import { Fragment } from 'react'
 import { homeCss } from '@/content/styles'
+import { homeDefaults } from '@/content/defaults'
 import { getHome, getSite } from '@/lib/content'
+import { getLatestPosts, postDate, postLabel, postTitle } from '@/lib/instagram'
 import { cssUrl, isInstagramPost, Lines, lines, linkProps, Rich, src } from '@/lib/render'
 import { BrandCredit, MenuScript } from './shared'
 
@@ -27,6 +29,33 @@ export default async function HomePage() {
   const rightGroups = groups.filter((g) => g.column === 'right')
   const profile = featured?.profileUrl || 'https://www.instagram.com/othmanboularas/'
   const cards = featured?.cards || []
+  const live = await getLatestPosts()
+  const moments = live
+    ? live.map((post) => ({
+        key: post.id,
+        href: post.permalink,
+        image: `/ig-image/${post.id}`,
+        alt: post.caption ? `Instagram post: ${postTitle(post.caption)}` : 'Othman Boularas Instagram post',
+        category: postLabel(post.mediaType),
+        title: postTitle(post.caption),
+        text: postDate(post.timestamp),
+        linkLabel: 'View on Instagram ↗',
+        ariaLabel: `Open Instagram post: ${postTitle(post.caption)}`,
+      }))
+    : cards.map((card, i) => {
+        const hasPost = isInstagramPost(card.postUrl)
+        return {
+          key: String(i),
+          href: hasPost ? card.postUrl.trim() : profile,
+          image: src(card.image),
+          alt: `Othman Boularas competition photograph — ${card.title}`,
+          category: card.category,
+          title: card.title,
+          text: card.text,
+          linkLabel: hasPost ? 'View Instagram post ↗' : 'Explore Instagram ↗',
+          ariaLabel: hasPost ? `Open Instagram post: ${card.title}` : 'Visit Othman Boularas Instagram profile',
+        }
+      })
   const mail = `mailto:${contact?.email || ''}${contact?.emailSubject ? `?subject=${encodeURIComponent(contact.emailSubject)}` : ''}`
 
   return (
@@ -270,7 +299,9 @@ export default async function HomePage() {
               <h2>
                 <Lines text={featured?.heading} />
               </h2>
-              <p className="section-intro">{featured?.intro}</p>
+              <p className="section-intro">
+                {live ? featured?.liveIntro || homeDefaults.featured.liveIntro : featured?.intro}
+              </p>
             </div>
             {featured?.buttonLabel && (
               <a className="btn" href={profile} rel="noopener noreferrer" target="_blank">
@@ -279,40 +310,24 @@ export default async function HomePage() {
             )}
           </div>
           <div className="featured-instagram-grid">
-            {cards.map((card, i) => {
-              const hasPost = isInstagramPost(card.postUrl)
-              const href = hasPost ? card.postUrl.trim() : profile
-              return (
-                <article className="featured-post" key={i}>
-                  <a
-                    aria-label={hasPost ? `Open Instagram post: ${card.title}` : 'Visit Othman Boularas Instagram profile'}
-                    className="featured-image"
-                    href={href}
-                    rel="noopener noreferrer"
-                    target="_blank"
-                  >
-                    {src(card.image) && (
-                      <img
-                        alt={`Othman Boularas competition photograph — ${card.title}`}
-                        loading="lazy"
-                        src={src(card.image)}
-                      />
-                    )}
-                    <span className="featured-index">{`${pad(i + 1)} / ${pad(cards.length)}`}</span>
+            {moments.map((m, i) => (
+              <article className="featured-post" key={m.key}>
+                <a aria-label={m.ariaLabel} className="featured-image" href={m.href} rel="noopener noreferrer" target="_blank">
+                  {m.image && <img alt={m.alt} loading="lazy" src={m.image} />}
+                  <span className="featured-index">{`${pad(i + 1)} / ${pad(moments.length)}`}</span>
+                </a>
+                <div className="featured-copy">
+                  <span className="featured-category">{m.category}</span>
+                  <h3 dir="auto">{m.title}</h3>
+                  <p dir="auto">{m.text}</p>
+                  <a className="featured-link" href={m.href} rel="noopener noreferrer" target="_blank">
+                    {m.linkLabel}
                   </a>
-                  <div className="featured-copy">
-                    <span className="featured-category">{card.category}</span>
-                    <h3>{card.title}</h3>
-                    <p>{card.text}</p>
-                    <a className="featured-link" href={href} rel="noopener noreferrer" target="_blank">
-                      {hasPost ? 'View Instagram post ↗' : 'Explore Instagram ↗'}
-                    </a>
-                  </div>
-                </article>
-              )
-            })}
+                </div>
+              </article>
+            ))}
           </div>
-          <p className="insta-note">{featured?.note}</p>
+          <p className="insta-note">{live ? featured?.liveNote || homeDefaults.featured.liveNote : featured?.note}</p>
         </section>
 
         <section className="section contact" id="contact">
