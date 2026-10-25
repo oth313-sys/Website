@@ -1,6 +1,7 @@
 /** Instagram API calls that don't need the CMS (safe to use inside CMS settings). */
 
-const GRAPH = 'https://graph.instagram.com'
+// INSTAGRAM_GRAPH_URL is only for testing against a fake server.
+const GRAPH = process.env.INSTAGRAM_GRAPH_URL || 'https://graph.instagram.com'
 
 /** Checks a token and returns the account's username. */
 export async function checkToken(token: string): Promise<{ ok: boolean; username?: string; error?: string }> {

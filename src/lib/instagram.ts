@@ -1,7 +1,8 @@
 import { getPayload } from 'payload'
 import config from '@payload-config'
 
-const GRAPH = 'https://graph.instagram.com'
+// INSTAGRAM_GRAPH_URL is only for testing against a fake server.
+const GRAPH = process.env.INSTAGRAM_GRAPH_URL || 'https://graph.instagram.com'
 
 export type InstagramPost = {
   id: string
